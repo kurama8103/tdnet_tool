@@ -1,13 +1,19 @@
 # TDnetのBeautifulSoupによる解析とSQL格納
 
+適時開示情報閲覧サービス(https://www.release.tdnet.info/)からデータ・PDFを取得するプログラム。  
  tdNetクラスにより動作。get***を実行するとtdNet.dfにtdnet開示データが取り込まれる。  
  仕様上取れるデータは30日以内のデータに限る。
  PDFダウンロードやデータ保存はtdNet.dfのデータを基に実行。
 
+Install 
+```bash
+pip3 install git+https://github.com/kurama8103/tdnet_tool
+```  
+
 例
 ```python
-import tdnet_pdf
-td = tdnet_pdf.tdNet()
+import tdnet_tool
+td = tdnet_tool.tdNet()
 
 #仕様上、30日以内のデータに限る
 td.getData_tdnet_byDay('2021-04-21')

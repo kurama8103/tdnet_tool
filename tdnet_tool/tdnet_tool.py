@@ -81,7 +81,7 @@ class tdNet:
                                             'evennew-R kjHistroy']).text
                                 ])
             # 時間調整
-            time.sleep(3)
+            sleep(3)
 
         # ループ後、リストをデータフレーム化
         colname = ['date', 'code', 'name', 'title',
