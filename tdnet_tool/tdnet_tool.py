@@ -4,7 +4,7 @@ import pandas as pd
 from sys import exit
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
-from time import sleep
+import time
 from sqlite3 import connect
 from urllib3 import PoolManager
 from requests import post
@@ -81,7 +81,7 @@ class tdNet:
                                             'evennew-R kjHistroy']).text
                                 ])
             # 時間調整
-            sleep(3)
+            time.sleep(3)
 
         # ループ後、リストをデータフレーム化
         colname = ['date', 'code', 'name', 'title',
@@ -190,7 +190,7 @@ class tdNet:
                 os.remove(filename)
                 
                 # 時間調整
-                sleep(3)
+                time.sleep(3)
 
     def getData_SQL(self, strSQL):
         conn = connect(self.db_path)
