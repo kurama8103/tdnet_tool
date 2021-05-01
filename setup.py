@@ -10,7 +10,7 @@ setuptools.setup(
     version="0.0.1",
     author="kurama8103",
     # author_email="author@example.com",
-    description="gpx file to pandas dateframe",
+    description="Get data, download PDF, connect sql.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/kurama8103/tdnet_tool",
