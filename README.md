@@ -1,6 +1,6 @@
 # TDnetのBeautifulSoupによる解析とSQL格納
 
-適時開示情報閲覧サービス(https://www.release.tdnet.info/)からデータ・PDFを取得するプログラム。  
+適時開示情報閲覧サービス(https://www.release.tdnet.info/) からデータ・PDFを取得するプログラム。  
  tdNetクラスにより動作。get***を実行するとtdNet.dfにtdnet開示データが取り込まれる。  
  仕様上取れるデータは30日以内のデータに限る。
  PDFダウンロードやデータ保存はtdNet.dfのデータを基に実行。
