@@ -1,10 +1,10 @@
 import os
+import time
 import datetime as dt
 import pandas as pd
 from sys import exit
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
-import time
 from sqlite3 import connect
 from urllib3 import PoolManager
 from requests import post
