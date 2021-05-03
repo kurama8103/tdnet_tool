@@ -198,8 +198,8 @@ class tdNet:
         #self.df['date'] =self.df['date'].apply(lambda x:pd.to_datetime(x,format='%Y-%m-%d %H:%M:%S'))
         self.df['date'] =self.df['date'].apply(pd.to_datetime)
 
-    def toHTML(self,filename='tdnet_list.html'):
-        self.df.to_html(filename, render_links=True)
+    def toHTML(self,filename='tdnet_list.html',encoding='utf_8_sig'):
+        self.df.to_html(filename, render_links=True,encoding=encoding )
     
     def toCSV(self,filename='tdnet_list.csv',encoding='utf_8_sig'):
         self.df.to_csv(filename,encoding=encoding)
