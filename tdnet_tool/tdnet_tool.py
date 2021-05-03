@@ -168,14 +168,14 @@ class tdNet:
         c.execute('''CREATE TABLE tdnet
                     (date text, code text, name text, title text, pdf text, xbrl text, place text, history text)''')
 
-    def downloadPDF(self, limit=3):
+    def downloadPDF(self, filename='tdnet.zip',limit=3):
         try:
             df=self.df.head(limit)
         except:
             df=self.df
         df=df.query('date >= @self.date_min')
         
-        with ZipFile('tdnet.zip', 'w', compression=ZIP_DEFLATED) as new_zip:
+        with ZipFile(filename, 'w', compression=ZIP_DEFLATED) as new_zip:
             for pdf, code, date, title in zip(df['pdf'], df['code'], df['date'], df['title']):
                 url = pdf
                 filename = str(code) + '_' + str(date)[:10].replace('-', '')+'_'+title+'.pdf'
