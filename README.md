@@ -15,10 +15,11 @@ pip3 install git+https://github.com/kurama8103/tdnet_tool
 import tdnet_tool
 td = tdnet_tool.tdNet()
 
-#仕様上、30日以内のデータに限る
+# 仕様上、30日以内のデータに限る
 td.getData_tdnet_byDay('2021-04-21')
 td.df.head()
 
+# "修正"をタイトルに含む開示を検索
 td.getData_tdnet_KeywordSearch('修正','2021-04-27','2021-04-27')
 td.df.head()
 ```

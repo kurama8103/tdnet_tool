@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
+# coding: utf-8
 import os
-import time
+from time import sleep
 import datetime as dt
 import pandas as pd
 from sys import exit
@@ -81,7 +83,7 @@ class tdNet:
                                             'evennew-R kjHistroy']).text
                                 ])
             # 時間調整
-            time.sleep(3)
+            sleep(3)
 
         # ループ後、リストをデータフレーム化
         colname = ['date', 'code', 'name', 'title',
@@ -190,7 +192,7 @@ class tdNet:
                 os.remove(filename)
                 
                 # 時間調整
-                time.sleep(3)
+                sleep(3)
 
     def getData_SQL(self, strSQL):
         conn = connect(self.db_path)
