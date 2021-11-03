@@ -51,6 +51,14 @@ class tdNet:
                 soup = BeautifulSoup(r, 'lxml')
 
             for e in soup.find(id="main-list-table").find_all('tr'):
+                # hrefの処理, なければループスキップ
+                try:
+                    href=url_td + e.find(class_=[
+                        'oddnew-M kjTitle', 'evennew-M kjTitle']).find('a').get('href')
+                except AttributeError:
+                    continue                
+                    
+                    
                 # XBRLの処理
                 xbrl_url = e.find(
                     class_=['oddnew-M kjXbrl', 'evennew-M kjXbrl']).find('a')
@@ -62,7 +70,7 @@ class tdNet:
                 # 日付の処理
                 str_time = e.find(
                     class_=['oddnew-L kjTime', 'evennew-L kjTime']).text
-
+                
                 # その他要素とリストの処理
                 list_td.append([dt.datetime.strptime(
                     date.strftime('%Y/%m/%d ')+str_time, '%Y/%m/%d %H:%M'),
@@ -72,10 +80,7 @@ class tdNet:
                                             'evennew-M kjName']).text,
                                 e.find(class_=['oddnew-M kjTitle',
                                             'evennew-M kjTitle']).text,
-                                url_td +
-                                e.find(
-                                    class_=['oddnew-M kjTitle', 'evennew-M kjTitle']).
-                                    find('a').get('href'),
+                                href,
                                 xbrl,
                                 e.find(class_=['oddnew-M kjPlace',
                                             'evennew-M kjPlace']).text,
@@ -83,10 +88,10 @@ class tdNet:
                                             'evennew-R kjHistroy']).text
                                 ])
             # 時間調整
-            sleep(3)
+            sleep(2)
 
         # ループ後、リストをデータフレーム化
-        colname = ['date', 'code', 'name', 'title',
+        colname = ['datetime', 'code', 'name', 'title',
                 'pdf', 'xbrl', 'place', 'history']
         df = pd.DataFrame(list_td, columns=colname)
 
@@ -94,6 +99,8 @@ class tdNet:
         df['name'] = df['name'].str.strip()
         df['place'] = df['place'].str.strip()
         df['history'] = df['history'].str.strip()
+        df['date']=df['datetime'].dt.strftime('%Y-%m-%d')
+        df['time']=df['datetime'].dt.strftime('%H:%M:%S')
         # toSQL(df)
         self.df=df
     
@@ -145,9 +152,13 @@ class tdNet:
                             e.find(class_='exchange').text,
                             e.find(class_='update').text])
 
-        colname = ['date', 'code', 'name', 'title',
+        colname = ['datetime', 'code', 'name', 'title',
                 'pdf', 'xbrl', 'place', 'history']
-        self.df = pd.DataFrame(list_td, columns=colname)
+        df = pd.DataFrame(list_td, columns=colname)
+        if len(df)>0:
+            df['date']=df['datetime'].dt.strftime('%Y-%m-%d')
+            df['time']=df['datetime'].dt.strftime('%H:%M:%S')
+        self.df=df
 
     def toSQL(self):
         if os.path.exists(self.db_path) == False:
@@ -168,14 +179,14 @@ class tdNet:
         conn = connect(self.db_path)
         c = conn.cursor()
         c.execute('''CREATE TABLE tdnet
-                    (date text, code text, name text, title text, pdf text, xbrl text, place text, history text)''')
+                    (datetime text, code text, name text, title text, pdf text, xbrl text, place text, history text, date text, time text, UNIQUE(pdf))''')
 
     def downloadPDF(self, filename='tdnet.zip',limit=3):
         try:
             df=self.df.head(limit)
         except:
             df=self.df
-        df=df.query('date >= @self.date_min')
+        df=df[df['datetime']>self.date_min]
         
         with ZipFile(filename, 'w', compression=ZIP_DEFLATED) as new_zip:
             for pdf, code, date, title in zip(df['pdf'], df['code'], df['date'], df['title']):
@@ -194,11 +205,12 @@ class tdNet:
                 # 時間調整
                 sleep(3)
 
-    def getData_SQL(self, strSQL):
+    def getData_SQL(self, strSQL, astype_datetime=True):
         conn = connect(self.db_path)
         self.df = pd.read_sql_query(strSQL, conn)
         #self.df['date'] =self.df['date'].apply(lambda x:pd.to_datetime(x,format='%Y-%m-%d %H:%M:%S'))
-        self.df['date'] =self.df['date'].apply(pd.to_datetime)
+        if astype_datetime==True:
+            self.df['datetime'] =self.df['datetime'].apply(pd.to_datetime)
 
     def toHTML(self,filename='tdnet_list.html',encoding='utf_8_sig'):
         self.df.to_html(filename, render_links=True,encoding=encoding )
