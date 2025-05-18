@@ -264,4 +264,15 @@ class tdNet:
         self.df.to_html(filename, render_links=True, encoding=encoding)
 
     def toCSV(self, filename="tdnet_list.csv", encoding="utf_8_sig"):
-        self.df.to_csv(filename, encoding=encoding)
+        if self.df.size:
+            # 既存のCSVファイルが存在する場合は読み込む
+            if os.path.exists(filename):
+                existing_df = pd.read_csv(filename, encoding=encoding)
+                # 新しいデータと既存のデータを結合し、重複を削除
+                combined_df = pd.concat([existing_df, self.df]).drop_duplicates(
+                    subset=["pdf"]
+                )
+                combined_df.to_csv(filename, index=False, encoding=encoding)
+            else:
+                # ファイルが存在しない場合は新規作成
+                self.df.to_csv(filename, index=False, encoding=encoding)
