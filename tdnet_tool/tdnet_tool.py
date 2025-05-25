@@ -276,3 +276,54 @@ class tdNet:
             else:
                 # ファイルが存在しない場合は新規作成
                 self.df.to_csv(filename, index=False, encoding=encoding)
+
+
+def xbrl_to_csv(xbrl_paths):
+    # 全ファイルのデータを格納するリスト
+    all_xbrl_data = []
+
+    # 各ファイルを処理
+    for file_type, xbrl_path in xbrl_paths.items():
+        # XBRLファイルから要素を抽出
+        with open(xbrl_path, "r", encoding="utf-8") as f:
+            xbrl_content = f.read()
+
+        # BeautifulSoupでパース
+        soup = BeautifulSoup(xbrl_content, "html.parser")
+
+        # 必要な要素を抽出
+        elements = soup.find_all(["ix:nonnumeric", "ix:nonfraction"])
+
+        # 各要素から必要な属性を抽出
+        for element in elements:
+            pname, name = element.get("name", "").split(":")
+            data = {
+                "file_type": file_type,  # dictのkeyを使用
+                "contextRef": element.get("contextref", ""),
+                "name_prefix": pname,
+                "name": name,
+                # 'name': element.get('name', ''),
+                "format": element.get("format", ""),
+                "unitRef": element.get("unitref", ""),
+                "decimals": element.get("decimals", ""),
+                "scale": element.get("scale", ""),
+                "sign": element.get("sign", ""),
+                "text": element.text.strip(),
+            }
+            all_xbrl_data.append(data)
+
+    # DataFrameに変換
+    df_xbrl = pd.DataFrame(all_xbrl_data)
+    # df_xbrl[['name_prefix','name']] = df_xbrl['name'].str.split(':', expand=True)
+    df_xbrl["text"] = df_xbrl.apply(
+        lambda row: (
+            (
+                pd.to_numeric(row["text"].replace(",", ""), errors="coerce")
+                * (-1 if row["sign"] == "-" else 1)
+            )
+            if len(row["scale"]) > 0
+            else row["text"]
+        ),
+        axis=1,
+    )
+    return df_xbrl
