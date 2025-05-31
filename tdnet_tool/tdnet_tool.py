@@ -6,19 +6,26 @@ import datetime as dt
 import pandas as pd
 from sys import exit
 from bs4 import BeautifulSoup
-from urllib.request import urlopen
+from urllib.request import urlopen,Request,ProxyHandler,build_opener,install_opener
+from urllib.parse import urlencode
 from sqlite3 import connect
-from urllib3 import PoolManager
-from requests import post
+# from urllib3 import PoolManager
+# from requests import post
 from zipfile import ZipFile, ZIP_DEFLATED
 
 
 class tdNet:
-    def __init__(self, db_path="tdnet.db"):
+    def __init__(self, db_path="tdnet.db",proxy=None):
         self.db_path = db_path
         self.date_base = dt.datetime.now()
         self.date_min = self.date_base - dt.timedelta(days=30)
         self.df = None
+        if proxy is not None:
+            self.opener = build_opener(ProxyHandler(proxy))
+            install_opener(self.opener)
+        else:
+            self.opener = build_opener()
+            install_opener(self.opener)
 
     def getData_tdnet_byDay(self, dateYmd=None):
         # 日付取得
@@ -155,10 +162,15 @@ class tdNet:
             "q": keyword,  # unicode
             "m": "0",
         }
-        response = post(
-            "https://www.release.tdnet.info/onsf/TDJFSearch/TDJFSearch", data=data
+        # response = post(
+        #     "https://www.release.tdnet.info/onsf/TDJFSearch/TDJFSearch", data=data
+        # )
+        # soup = BeautifulSoup(response.text, "lxml")
+        response = Request(
+            "https://www.release.tdnet.info/onsf/TDJFSearch/TDJFSearch", data=urlencode(data).encode('utf-8')
         )
-        soup = BeautifulSoup(response.text, "lxml")
+        response = self.opener.open(response)
+        soup = BeautifulSoup(response, "lxml")
 
         list_td = []
         url_td = "https://www.release.tdnet.info"
@@ -242,8 +254,9 @@ class tdNet:
                 )
 
                 # download
-                request_methods = PoolManager()
-                response = request_methods.request("GET", url)
+                # request_methods = PoolManager()
+                # response = request_methods.request("GET", url)
+                response = self.opener.open(url)
                 f = open(filename, "wb")
                 f.write(response.data)
                 f.close()
