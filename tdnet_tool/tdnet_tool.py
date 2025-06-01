@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
 import os
-from time import sleep
 import datetime as dt
 import pandas as pd
 from sys import exit
